@@ -23,8 +23,6 @@ enum IntoColorError {
     IntConversion,
 }
 
-// I AM NOT DONE
-
 // Your task is to complete this implementation
 // and return an Ok result of inner type Color.
 // You need to create an implementation for a tuple of three integers,
@@ -34,10 +32,16 @@ enum IntoColorError {
 // but the slice implementation needs to check the slice length!
 // Also note that correct RGB color values must be integers in the 0..=255 range.
 
+fn in_range(color: i16) -> bool {
+    return color >= 0 && color <= 255;
+}
+
 // Tuple implementation
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let (r, g, b) = tuple;
+        Self::try_from([r, g, b])
     }
 }
 
@@ -45,6 +49,17 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        if !arr.into_iter().all(|color| in_range(*color)) {
+            return Err(IntoColorError::IntConversion);
+        }
+
+        let [red, green, blue] = arr;
+
+        Ok(Color {
+            red: red.try_into().unwrap(),
+            green: green.try_into().unwrap(),
+            blue: blue.try_into().unwrap(),
+        })
     }
 }
 
@@ -52,6 +67,11 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        if slice.len() != 3 {
+            return Err(IntoColorError::BadLen);
+        }
+
+        Self::try_from([slice[0], slice[1], slice[2]])
     }
 }
 

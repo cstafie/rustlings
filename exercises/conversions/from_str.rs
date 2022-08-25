@@ -6,6 +6,8 @@
 // You can read more about it at https://doc.rust-lang.org/std/str/trait.FromStr.html
 // Execute `rustlings hint from_str` or use the `hint` watch subcommand for a hint.
 
+use std::borrow::BorrowMut;
+// use std::io::Empty;
 use std::num::ParseIntError;
 use std::str::FromStr;
 
@@ -28,8 +30,6 @@ enum ParsePersonError {
     ParseInt(ParseIntError),
 }
 
-// I AM NOT DONE
-
 // Steps:
 // 1. If the length of the provided string is 0, an error should be returned
 // 2. Split the given string on the commas present in it
@@ -46,6 +46,30 @@ enum ParsePersonError {
 impl FromStr for Person {
     type Err = ParsePersonError;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        if s.len() == 0 {
+            return Err(ParsePersonError::Empty);
+        }
+
+        let str_vec: Vec<&str> = s.split(',').collect();
+
+        if str_vec.len() != 2 {
+            return Err(ParsePersonError::BadLen);
+        }
+
+        let name = str_vec[0];
+        let age = str_vec[1];
+
+        if name.is_empty() {
+            return Err(ParsePersonError::NoName);
+        }
+
+        match age.parse() {
+            Err(e) => Err(ParsePersonError::ParseInt(e)),
+            Ok(age) => Ok(Person {
+                name: name.to_string(),
+                age,
+            }),
+        }
     }
 }
 
